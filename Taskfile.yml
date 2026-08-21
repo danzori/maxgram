@@ -1,0 +1,17 @@
+version: "3"
+
+tasks:
+    lint:
+        desc: Run golangci-lint
+        cmds:
+            - golangci-lint run --timeout=5m
+
+    lint:fix:
+        desc: Run golangci-lint with autofix
+        cmds:
+            - golangci-lint run --fix --timeout=5m
+
+    fix:
+        desc: Rewrite code that uses outdated Go APIs
+        cmds:
+            - go fix ./...
