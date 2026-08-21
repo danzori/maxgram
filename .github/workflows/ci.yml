@@ -1,0 +1,57 @@
+name: ci
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
+    workflow_dispatch:
+
+permissions:
+    contents: read
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        steps:
+            -   uses: actions/checkout@v4
+            -   uses: actions/setup-go@v5
+                with:
+                    go-version-file: go.mod
+                    cache: false
+            -   uses: golangci/golangci-lint-action@v8
+                with:
+                    version: v2.13.1
+
+    test:
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        steps:
+            -   uses: actions/checkout@v4
+            -   uses: actions/setup-go@v5
+                with:
+                    go-version-file: go.mod
+            -   name: verify go.mod is tidy
+                run: go mod tidy -diff
+            -   name: build
+                run: go build ./...
+            -   name: test
+                run: go test -race -count=1 ./...
+
+    vulncheck:
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        steps:
+            -   uses: actions/checkout@v4
+            -   uses: actions/setup-go@v5
+                with:
+                    go-version-file: go.mod
+            -   name: install govulncheck
+                run: go install golang.org/x/vuln/cmd/govulncheck@latest
+            -   name: scan
+                run: govulncheck ./...
