@@ -308,7 +308,8 @@ formatters:
         gofumpt:
             # Choose whether to use the extra rules.
             # Default: false
-            extra-rules: true
+            extra:
+                group-params: true
 
 issues:
     # Maximum count of issues with the same text.
