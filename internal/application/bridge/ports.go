@@ -26,8 +26,13 @@ type Messenger interface {
 	Notify(ctx context.Context, threadID int, text string) error
 }
 
+type MaxGateway interface {
+	SendText(ctx context.Context, chatID int64, text string) (string, error)
+}
+
 type TopicRepository interface {
 	ByChat(ctx context.Context, chatID int64) (topic.Topic, error)
+	ByThread(ctx context.Context, threadID int) (topic.Topic, error)
 	All(ctx context.Context) ([]topic.Topic, error)
 	Save(ctx context.Context, t topic.Topic) error
 	Delete(ctx context.Context, chatID int64) error

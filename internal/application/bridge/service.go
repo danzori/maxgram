@@ -19,6 +19,7 @@ type Settings struct {
 type Service struct {
 	cfg      Settings
 	tg       Messenger
+	max      MaxGateway
 	topics   TopicRepository
 	excluded map[int64]struct{}
 	log      *slog.Logger

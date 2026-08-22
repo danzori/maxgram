@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/danzori/maxgram/internal/config"
+	"github.com/danzori/maxgram/internal/domain/chat"
 	"github.com/danzori/maxgram/internal/domain/message"
 )
 
@@ -46,6 +47,32 @@ func (s *Service) Incoming(ctx context.Context, msg message.Message) error {
 	}
 
 	return nil
+}
+
+func (s *Service) Outgoing(ctx context.Context, threadID int, text string) error {
+	t, err := s.topics.ByThread(ctx, threadID)
+	if err != nil {
+		return err
+	}
+
+	if s.isExcluded(t.ChatID) {
+		return fmt.Errorf("%w: chat %d", chat.ErrExcluded, t.ChatID)
+	}
+
+	if _, err = s.max.SendText(ctx, t.ChatID, text); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) Bound(ctx context.Context, threadID int) bool {
+	t, err := s.topics.ByThread(ctx, threadID)
+	if err != nil {
+		return false
+	}
+
+	return !s.isExcluded(t.ChatID)
 }
 
 func (s *Service) targets(ctx context.Context, msg message.Message) []Target {
