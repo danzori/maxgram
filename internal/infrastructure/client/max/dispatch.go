@@ -46,6 +46,9 @@ func (c *Client) handle(ctx context.Context, data []byte, a *attempt) error {
 	case pkt.Opcode == OpAuthSnapshot && pkt.Cmd == cmdResponse:
 		return c.onAuthorized(pkt.Payload, a)
 
+	case pkt.Opcode == OpDispatch:
+		return c.onDispatch(pkt.Payload)
+
 	case pkt.Opcode == OpHeartbeat:
 		return nil
 
@@ -77,6 +80,40 @@ func (c *Client) onAuthorized(payload jsontext.Value, a *attempt) error {
 	a.authOK.Store(true)
 
 	c.log.Info("authorized", "self_id", snap.Profile.id(), "chats", len(snap.Chats))
+
+	go func() {
+		c.queue.push(Event{Kind: EventReady})
+	}()
+
+	return nil
+}
+
+func (c *Client) onDispatch(payload jsontext.Value) error {
+	var d dispatchPayload
+
+	if err := json.Unmarshal(payload, &d); err != nil {
+		return fmt.Errorf("decode dispatch: %w", err)
+	}
+
+	if d.Message == nil || d.ChatID == 0 {
+		return nil
+	}
+
+	if d.Message.UpdateTime != nil {
+		return nil
+	}
+
+	depth := c.queue.push(
+		Event{
+			Kind:    EventMessage,
+			Message: d.Message,
+			ChatID:  d.ChatID,
+			Own:     d.Message.Sender != 0 && d.Message.Sender == c.selfID.Load(),
+		},
+	)
+	if depth > queueWarnDepth {
+		c.log.Warn("event queue is failing behind", "depth", depth)
+	}
 
 	return nil
 }

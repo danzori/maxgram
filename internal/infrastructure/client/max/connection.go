@@ -16,6 +16,8 @@ const (
 
 	authTimeout        = 30 * time.Second
 	authFailureBackoff = time.Minute
+
+	queueWarnDepth = 512
 )
 
 type attempt struct {
