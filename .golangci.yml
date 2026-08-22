@@ -24,6 +24,7 @@ linters:
         - noinlineerr
         - paralleltest
         - goconst
+        - canonicalheader # Panics on some packages during analysis.
 
     settings:
         cyclop:
