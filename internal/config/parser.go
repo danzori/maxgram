@@ -131,7 +131,7 @@ func (p *parser) int64Slice(key string) []int64 {
 	}
 
 	parts := strings.Split(raw, ",")
-	out := make([]int64, len(parts))
+	out := make([]int64, 0, len(parts))
 
 	for _, part := range parts {
 		part = strings.TrimSpace(part)
