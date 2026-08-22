@@ -194,6 +194,9 @@ linters:
                   arguments:
                       - convention-name-check-regex: "^[a-z][a-z0-9_]*$" # allow flatcase, snake_case
 
+                - name: blank-imports
+                  disabled: true
+
         testifylint:
             # Enable all checkers (https://github.com/Antonboom/testifylint#checkers).
             # Default: false
