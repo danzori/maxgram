@@ -2,8 +2,8 @@ package max
 
 import (
 	"context"
-	"encoding/json"
 	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"errors"
 	"fmt"
 )
@@ -22,6 +22,20 @@ func (c *Client) handle(ctx context.Context, data []byte, a *attempt) error {
 	}
 
 	c.log.Debug("packet", "opcode", int(pkt.Opcode), "cmd", pkt.Cmd, "payload", string(pkt.Payload))
+
+	if pkt.Cmd == cmdResponse || pkt.Cmd == cmdError {
+		if ch, ok := c.take(pkt.Seq); ok {
+			res := result{payload: pkt.Payload}
+
+			if pkt.Cmd == cmdError {
+				res.err = fmt.Errorf("%w: opcode %d: %s", ErrRemote, pkt.Opcode, remoteReason(pkt.Payload))
+			}
+
+			ch <- res
+
+			return nil
+		}
+	}
 
 	if pkt.Cmd == cmdError {
 		if pkt.Opcode == OpAuthSnapshot {
@@ -44,7 +58,7 @@ func (c *Client) handle(ctx context.Context, data []byte, a *attempt) error {
 		return c.authorize(ctx)
 
 	case pkt.Opcode == OpAuthSnapshot && pkt.Cmd == cmdResponse:
-		return c.onAuthorized(pkt.Payload, a)
+		return c.onAuthorized(ctx, pkt.Payload, a)
 
 	case pkt.Opcode == OpDispatch:
 		return c.onDispatch(pkt.Payload)
@@ -69,20 +83,27 @@ func (c *Client) authorize(ctx context.Context) error {
 	)
 }
 
-func (c *Client) onAuthorized(payload jsontext.Value, a *attempt) error {
+func (c *Client) onAuthorized(ctx context.Context, payload jsontext.Value, a *attempt) error {
 	var snap snapshot
 
 	if err := json.Unmarshal(payload, &snap); err != nil {
 		return fmt.Errorf("%w: %w", ErrSnapshot, err)
 	}
 
-	c.selfID.Store(snap.Profile.id())
+	participants := c.dir.LoadSnapshot(snap)
+	c.selfID.Store(c.dir.SelfID())
 	a.authOK.Store(true)
 
-	c.log.Info("authorized", "self_id", snap.Profile.id(), "chats", len(snap.Chats))
+	c.log.Info("authorized", "self_id", c.dir.SelfID(), "chats", len(snap.Chats))
 
 	go func() {
-		c.queue.push(Event{Kind: EventReady})
+		c.dir.Prefetch(ctx, participants)
+		c.queue.push(
+			Event{
+				Kind:  EventReady,
+				Chats: c.dir.Chats(),
+			},
+		)
 	}()
 
 	return nil

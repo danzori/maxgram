@@ -62,7 +62,10 @@ func (c *Client) connect(ctx context.Context) error {
 	c.conn.Store(conn)
 	c.resetSeq()
 
-	defer c.conn.Store(nil)
+	defer func() {
+		c.conn.Store(nil)
+		c.failPending(ErrDisconnected)
+	}()
 
 	if err = c.send(ctx, OpHandshake, c.handshake()); err != nil {
 		return fmt.Errorf("handshake: %w", err)

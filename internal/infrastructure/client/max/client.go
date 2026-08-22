@@ -22,6 +22,10 @@ type Client struct {
 	writeMu sync.Mutex
 	seq     int
 
+	mu      sync.Mutex
+	pending map[int]chan result
+
+	dir    *Directory
 	selfID atomic.Int64
 
 	queue  *queue
@@ -29,16 +33,24 @@ type Client struct {
 }
 
 func New(cfg config.Max, log *slog.Logger) *Client {
-	return &Client{
-		cfg:    cfg,
-		log:    log.With("component", "max.client"),
-		queue:  newQueue(),
-		events: make(chan Event),
+	c := &Client{
+		cfg:     cfg,
+		log:     log.With("component", "max.client"),
+		pending: make(map[int]chan result),
+		queue:   newQueue(),
+		events:  make(chan Event),
 	}
+	c.dir = newDirectory(c, log)
+
+	return c
 }
 
 func (c *Client) Events() <-chan Event {
 	return c.events
+}
+
+func (c *Client) Directory() *Directory {
+	return c.dir
 }
 
 func (c *Client) Run(ctx context.Context) error {

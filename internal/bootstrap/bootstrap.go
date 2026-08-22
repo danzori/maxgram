@@ -27,7 +27,12 @@ func Run(envFile string) error {
 	listener := websocket.New(
 		client.Events(), func(_ context.Context, ev maxclient.Event) {
 			if ev.Kind == maxclient.EventMessage {
-				log.Info("message", "chat_id", ev.ChatID, "sender", ev.Message.Sender, "text", ev.Message.Text)
+				log.Info(
+					"message",
+					"chat_id", ev.ChatID,
+					"from", client.Directory().UserName(ctx, ev.Message.Sender),
+					"text", ev.Message.Text,
+				)
 			}
 		},
 	)
