@@ -26,8 +26,6 @@ const (
 )
 
 const (
-	DefaultLockTopics = true
-
 	DefaultSendTimeout = 120 * time.Second
 	DefaultRateLimit   = 18.0
 	DefaultMaxRetries  = 3

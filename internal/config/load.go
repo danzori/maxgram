@@ -46,8 +46,6 @@ func Load(envFile string) (Config, error) {
 		BotToken: p.required("TG_BOT_TOKEN"),
 		ChatID:   p.requiredInt64("TG_CHAT_ID"),
 
-		LockTopics: p.bool("TG_LOCK_TOPICS", DefaultLockTopics),
-
 		SendTimeout: p.duration("TG_SEND_TIMEOUT", DefaultSendTimeout),
 		RateLimit:   p.float("TG_RATE_LIMIT", DefaultRateLimit),
 		MaxRetries:  p.integer("TG_MAX_RETRIES", DefaultMaxRetries),

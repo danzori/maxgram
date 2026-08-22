@@ -55,8 +55,6 @@ type Telegram struct {
 	BotToken string
 	ChatID   int64
 
-	LockTopics bool
-
 	SendTimeout time.Duration
 	RateLimit   float64
 	MaxRetries  int
