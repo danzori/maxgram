@@ -38,6 +38,16 @@ func (r *TopicRepository) ByChat(ctx context.Context, chatID int64) (topic.Topic
 	return scanTopic(row, fmt.Sprintf("chat %d", chatID))
 }
 
+func (r *TopicRepository) ByThread(ctx context.Context, threadID int) (topic.Topic, error) {
+	row := r.sb.
+		Select(topicColumns...).
+		From(topicsTable).
+		Where(squirrel.Eq{"thread_id": threadID}).
+		QueryRowContext(ctx)
+
+	return scanTopic(row, fmt.Sprintf("thread %d", threadID))
+}
+
 func (r *TopicRepository) All(ctx context.Context) ([]topic.Topic, error) {
 	rows, err := r.sb.
 		Select(topicColumns...).
