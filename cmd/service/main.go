@@ -9,7 +9,8 @@ import (
 
 func main() {
 	if err := bootstrap.Run(".env"); err != nil {
-		fmt.Fprintln(os.Stderr, "maxgram: ", err)
+		_, _ = fmt.Fprintln(os.Stderr, "maxgram:", err)
+
 		os.Exit(1)
 	}
 }
