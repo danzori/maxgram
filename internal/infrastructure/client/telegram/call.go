@@ -55,7 +55,7 @@ func call[T any](ctx context.Context, c *Client, op string, fn func(context.Cont
 func callVoid(ctx context.Context, c *Client, op string, fn func(context.Context) error) error {
 	_, err := call(
 		ctx, c, op, func(ctx context.Context) (struct{}, error) {
-			return struct{}{}, nil
+			return struct{}{}, fn(ctx)
 		},
 	)
 
