@@ -29,6 +29,9 @@ linters:
             # Default: 10
             max-complexity: 15
 
+        exhaustive:
+            default-signifies-exhaustive: true
+
         forbidigo:
             analyze-types: true
             forbid:
