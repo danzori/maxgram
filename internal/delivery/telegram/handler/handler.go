@@ -2,12 +2,14 @@ package handler
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 
 	"github.com/mymmrac/telego"
 
 	"github.com/danzori/maxgram/internal/application/bridge"
 	"github.com/danzori/maxgram/internal/delivery/telegram/mapper"
+	"github.com/danzori/maxgram/internal/domain/topic"
 	tgclient "github.com/danzori/maxgram/internal/infrastructure/client/telegram"
 )
 
@@ -54,13 +56,43 @@ func (h *Handler) Handle(ctx context.Context, update telego.Update) {
 			"Checking the topics, this may take a minute.",
 			"Done. Messages from Max will arrive in the topics.",
 		)
+
+		return
 	case "/reset":
 		h.provision(
 			ctx, u, h.svc.Reset,
 			"Deleting the topics one by one. Telegram rate limits this, so it can take a few minutes - wait for the confirmation.",
 			"Done, every topic is deleted. Send /start to set them up again.",
 		)
+
+		return
 	default:
+		h.relay(ctx, u)
+	}
+}
+
+func (h *Handler) relay(ctx context.Context, u mapper.Update) {
+	if u.ThreadID == 0 || !h.svc.Bound(ctx, u.ThreadID) {
+		h.log.Debug("message outside a chat topic", "thread_id", u.ThreadID)
+
+		return
+	}
+
+	if u.Text == "" {
+		h.reply(ctx, u, "Only text can be sent to Max.")
+
+		return
+	}
+
+	err := h.svc.Outgoing(ctx, u.ThreadID, u.Text)
+	switch {
+	case err == nil:
+		h.log.Info("relayed to max", "thread_id", u.ThreadID)
+	case errors.Is(err, topic.ErrNotFound):
+		h.log.Debug("message in an unmapped topic", "thread_id", u.ThreadID)
+	default:
+		h.log.Error("relay to max", "thread_id", u.ThreadID, "err", err)
+		h.reply(ctx, u, "Could not send the message to Max.")
 	}
 }
 
