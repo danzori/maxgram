@@ -1,4 +1,3 @@
-//nolint:predeclared // MAX is the name of the messenger
 package max
 
 import (

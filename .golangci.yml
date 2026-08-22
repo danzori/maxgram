@@ -5,7 +5,8 @@ linters:
         - depguard # A good way to forbid importing certain packages. Depends on the development approach.
         - dupl # Full of false positives
         - err113 # Opinionated.
-        - exhaustruct # Depends on the development approach.
+        - exhaustruct
+        - exhaustruct_v5 # Depends on the development approach.
         - funlen # Not the best code quality metric. Better use gocyclo, gocognit, maintidx. For example, table-driven tests will always be large.
         - gochecknoglobals # Does not allow adding exceptions (time.Date, regex.Must, etc). reassign with * configuration partially solves the problem https://github.com/tommy-muehle/go-mnd/issues/14
         - godoclint # More suitable for libraries
@@ -282,6 +283,11 @@ linters:
               linters:
                   - forbidigo
               text: 'panic\(\) in main is forbidden\. Use os\.Exit\(1\) instead'
+
+            - path: internal/infrastructure/client/max/
+              linters:
+                  - predeclared
+                  - tagliatelle
 
 formatters:
     enable:
