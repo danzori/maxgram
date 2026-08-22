@@ -6,6 +6,7 @@ import (
 	"syscall"
 
 	"github.com/danzori/maxgram/internal/config"
+	maxclient "github.com/danzori/maxgram/internal/infrastructure/client/max"
 	logger "github.com/danzori/maxgram/internal/observability/logger/slog"
 )
 
@@ -21,7 +22,5 @@ func Run(envFile string) error {
 	log := logger.New(cfg.Log)
 	log.Info("maxgram started")
 
-	<-ctx.Done()
-
-	return nil
+	return maxclient.New(cfg.Max, log).Run(ctx)
 }
