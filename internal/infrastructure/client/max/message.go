@@ -12,3 +12,7 @@ type dispatchPayload struct {
 	ChatID  int64    `json:"chatId"`
 	Message *Message `json:"message"`
 }
+
+type sentMessageResponse struct {
+	Message *Message `json:"message"`
+}
