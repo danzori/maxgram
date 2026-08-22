@@ -26,7 +26,7 @@ func (c *Client) handle(ctx context.Context, data []byte, a *attempt) error {
 	if pkt.Cmd == cmdError {
 		if pkt.Opcode == OpAuthSnapshot {
 			err := fmt.Errorf(
-				"%w: %s - check MAX_TOKEN and MAX_DEVICE_ID (snapshot_chats_count=%d)",
+				"%w: %s - check MAX_TOKEN (snapshot_chats_count=%d)",
 				ErrAuthRejected, remoteReason(pkt.Payload), c.cfg.ChatsSnapshot,
 			)
 			a.failed.CompareAndSwap(nil, &err)
