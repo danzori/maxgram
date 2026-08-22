@@ -18,7 +18,7 @@ func Load(envFile string) (Config, error) {
 
 	cfg.Max = Max{
 		Token:    p.required("MAX_TOKEN"),
-		DeviceID: p.required("DEVICE_ID"),
+		DeviceID: p.required("MAX_DEVICE_ID"),
 
 		WebSocketURL:      p.str("MAX_WS_URL", DefaultWebSocketURL),
 		ReconnectInterval: p.duration("MAX_RECONNECT_INTERVAL", DefaultReconnectInterval),
