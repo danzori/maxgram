@@ -59,6 +59,7 @@ func (q *queue) push(e Event) int {
 func (q *queue) pop(ctx context.Context) (Event, bool) {
 	for {
 		q.mu.Lock()
+
 		if len(q.items) > 0 {
 			e := q.items[0]
 			q.items = q.items[1:]
@@ -66,7 +67,9 @@ func (q *queue) pop(ctx context.Context) (Event, bool) {
 
 			return e, true
 		}
+
 		closed := q.closed
+
 		q.mu.Unlock()
 
 		if closed {

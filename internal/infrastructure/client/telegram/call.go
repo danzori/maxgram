@@ -21,12 +21,15 @@ func call[T any](ctx context.Context, c *Client, op string, fn func(context.Cont
 		}
 
 		reqCtx, reqCancel := context.WithTimeout(ctx, c.cfg.SendTimeout)
+
 		out, err := fn(reqCtx)
+
 		reqCancel()
 
 		if err == nil {
 			return out, nil
 		}
+
 		lastErr = err
 
 		wait, retry := retryDelay(err, attempt)

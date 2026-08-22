@@ -49,6 +49,7 @@ func (d *Directory) LoadSnapshot(snap snapshot) []int64 {
 		for _, n := range snap.Profile.displayNames() {
 			if display := n.display(); display != "" {
 				d.users[id] = display
+
 				break
 			}
 		}
@@ -102,6 +103,7 @@ func (d *Directory) Prefetch(ctx context.Context, ids []int64) {
 	pending := make([]int64, 0, len(ids))
 
 	d.mu.RLock()
+
 	for _, id := range ids {
 		_, known := d.users[id]
 		_, failed := d.failed[id]
@@ -110,6 +112,7 @@ func (d *Directory) Prefetch(ctx context.Context, ids []int64) {
 			pending = append(pending, id)
 		}
 	}
+
 	d.mu.RUnlock()
 
 	for chunk := range slices.Chunk(pending, contactBatchSize) {
@@ -134,6 +137,7 @@ func (d *Directory) UserName(ctx context.Context, id int64) string {
 	if known {
 		return name
 	}
+
 	if failed {
 		return strconv.FormatInt(id, 10)
 	}

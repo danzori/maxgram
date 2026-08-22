@@ -52,6 +52,7 @@ func (r *TopicRepository) All(ctx context.Context) ([]topic.Topic, error) {
 	}()
 
 	var out []topic.Topic
+
 	for rows.Next() {
 		t, scanErr := scanTopic(rows, "")
 		if scanErr != nil {

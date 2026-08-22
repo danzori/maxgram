@@ -40,6 +40,7 @@ func (h *Handler) Handle(ctx context.Context, update telego.Update) {
 		h.remove(ctx, u)
 
 		return
+	default:
 	}
 
 	if u.Command != "" && u.ThreadID != 0 {
@@ -59,6 +60,7 @@ func (h *Handler) Handle(ctx context.Context, update telego.Update) {
 			"Deleting the topics one by one. Telegram rate limits this, so it can take a few minutes - wait for the confirmation.",
 			"Done, every topic is deleted. Send /start to set them up again.",
 		)
+	default:
 	}
 }
 

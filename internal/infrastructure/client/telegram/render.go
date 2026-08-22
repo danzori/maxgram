@@ -13,6 +13,7 @@ const (
 	ownSenderLabel = "You"
 )
 
+//nolint:revive // withChat selects between two presentation contexts
 func header(msg message.Message, withChat bool) string {
 	oneVoice := msg.ChatKind == chat.KindDialog || msg.ChatKind == chat.KindChannel
 
@@ -46,7 +47,7 @@ func timeFooter(msg message.Message) string {
 		return ""
 	}
 
-	return "\n<blockquote>Sent at " + msg.SentAt.Local().Format(timeLayout) + "</blockquote>"
+	return "\n<blockquote>Sent at " + msg.SentAt.Format(timeLayout) + "</blockquote>"
 }
 
 func senderLabel(msg message.Message) string {

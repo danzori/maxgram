@@ -9,6 +9,7 @@ import (
 	maxclient "github.com/danzori/maxgram/internal/infrastructure/client/max"
 )
 
+//nolint:revive // own describes message ownership, not control flow
 func Message(ctx context.Context, dir *maxclient.Directory, chatID int64, raw *maxclient.Message, own bool) message.Message {
 	msg := message.Message{
 		ID:     raw.ID,

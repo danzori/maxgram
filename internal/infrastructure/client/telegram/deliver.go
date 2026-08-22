@@ -24,7 +24,7 @@ func (c *Client) Deliver(ctx context.Context, d bridge.Delivery) error {
 	)
 
 	for _, target := range d.Targets {
-		text := compose(d.Message, target, body, false)
+		text := compose(d.Message, target, body)
 
 		_, err := call(
 			ctx, c, "sendMessage", func(ctx context.Context) (*telego.Message, error) {
@@ -46,6 +46,7 @@ func (c *Client) Deliver(ctx context.Context, d bridge.Delivery) error {
 
 			continue
 		}
+
 		delivered++
 	}
 
@@ -60,8 +61,9 @@ func (c *Client) Deliver(ctx context.Context, d bridge.Delivery) error {
 	return nil
 }
 
-func compose(msg message.Message, target bridge.Target, body string, asCaption bool) string {
+func compose(msg message.Message, target bridge.Target, body string) string {
 	parts := make([]string, 0, 3)
+
 	for _, part := range []string{header(msg, target.WithChat), body, timeFooter(msg)} {
 		if part != "" {
 			parts = append(parts, part)

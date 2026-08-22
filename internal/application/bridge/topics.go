@@ -26,6 +26,7 @@ func (s *Service) Bootstrap(ctx context.Context, chats []chat.Chat) error {
 		if err != nil {
 			return fmt.Errorf("check forum state: %w", err)
 		}
+
 		if !ready {
 			s.log.Info("no topics in telegram, waiting for /start", "chats", len(chats))
 
@@ -43,9 +44,12 @@ func (s *Service) Start(ctx context.Context) error {
 		return fmt.Errorf("prepare forum: %w", err)
 	}
 
-	s.syncTopics(ctx)
+	if _, err := s.syncTopics(ctx); err != nil {
+		return fmt.Errorf("sync topics: %w", err)
+	}
 
 	var chats []chat.Chat
+
 	if pending := s.pending.Load(); pending != nil {
 		chats = *pending
 	}
@@ -102,11 +106,13 @@ func (s *Service) syncTopics(ctx context.Context) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+
 	if len(stored) == 0 {
 		return false, nil
 	}
 
 	probe := stored[0]
+
 	exists, err := s.tg.TopicExists(ctx, probe.ThreadID)
 	if err != nil {
 		s.log.Warn(
@@ -167,6 +173,7 @@ func (s *Service) chatsNeedingTopics(chats []chat.Chat) []chat.Chat {
 	}
 
 	var since time.Time
+
 	if s.cfg.TopicMode == config.TopicModeActive {
 		since = time.Now().AddDate(0, 0, -s.cfg.ActiveDays)
 	}
@@ -223,7 +230,7 @@ func (s *Service) chatTopic(ctx context.Context, chatID int64, title string) (to
 
 	name := topic.NormalizeName(title)
 	if name == "" {
-		name = fmt.Sprint("chat %d", chatID)
+		name = fmt.Sprintf("chat %d", chatID)
 	}
 
 	threadID, err := s.tg.CreateTopic(ctx, name)

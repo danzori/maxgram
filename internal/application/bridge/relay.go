@@ -31,15 +31,12 @@ func (s *Service) Incoming(ctx context.Context, msg message.Message) error {
 		return nil
 	}
 
-	targets, err := s.targets(ctx, msg)
-	if err != nil {
-		return err
-	}
+	targets := s.targets(ctx, msg)
 	if len(targets) == 0 {
 		return nil
 	}
 
-	if err = s.tg.Deliver(
+	if err := s.tg.Deliver(
 		ctx, Delivery{
 			Message: msg,
 			Targets: targets,
@@ -51,7 +48,7 @@ func (s *Service) Incoming(ctx context.Context, msg message.Message) error {
 	return nil
 }
 
-func (s *Service) targets(ctx context.Context, msg message.Message) ([]Target, error) {
+func (s *Service) targets(ctx context.Context, msg message.Message) []Target {
 	chatTopic, err := s.chatTopic(ctx, msg.ChatID, msg.DisplayChatTitle())
 	if err != nil {
 		s.log.Error("resolve chat topic", "chat_id", msg.ChatID, "err", err)
@@ -61,8 +58,8 @@ func (s *Service) targets(ctx context.Context, msg message.Message) ([]Target, e
 				ThreadID: mainArea,
 				WithChat: true,
 			},
-		}, nil
+		}
 	}
 
-	return []Target{{ThreadID: chatTopic.ThreadID}}, nil
+	return []Target{{ThreadID: chatTopic.ThreadID}}
 }

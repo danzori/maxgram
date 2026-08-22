@@ -41,7 +41,7 @@ func Run(envFile string) error {
 
 	defer func() {
 		if closeErr := a.close(); closeErr != nil {
-			fmt.Fprintln(os.Stderr, "maxgram: close:", closeErr)
+			_, _ = fmt.Fprintln(os.Stderr, "maxgram: close:", closeErr)
 		}
 	}()
 

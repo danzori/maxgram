@@ -32,6 +32,8 @@ func (h *Handler) Handle(ctx context.Context, ev maxclient.Event) {
 		h.onDisconnected(ctx)
 	case maxclient.EventMessage:
 		h.onMessage(ctx, ev)
+	default:
+		h.log.Warn("unhandled max event", "kind", int(ev.Kind))
 	}
 }
 

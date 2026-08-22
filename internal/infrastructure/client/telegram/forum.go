@@ -18,7 +18,7 @@ func (c *Client) EnsureForum(ctx context.Context) error {
 		},
 	)
 	if err != nil {
-		return fmt.Errorf("read chat %d: %w", c.chatID, err)
+		return fmt.Errorf("read chat %d: %w", c.cfg.ChatID, err)
 	}
 
 	me, err := call(
@@ -30,11 +30,7 @@ func (c *Client) EnsureForum(ctx context.Context) error {
 		return fmt.Errorf("identify the bot: %w", err)
 	}
 
-	if err = validateSetup(c.cfg.ChatID, info.Type, me); err != nil {
-		return err
-	}
-
-	return nil
+	return validateSetup(c.cfg.ChatID, info.Type, me)
 }
 
 func (c *Client) CreateTopic(ctx context.Context, name string) (int, error) {

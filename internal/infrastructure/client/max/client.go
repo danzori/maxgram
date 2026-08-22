@@ -55,6 +55,7 @@ func (c *Client) Directory() *Directory {
 
 func (c *Client) Run(ctx context.Context) error {
 	go c.pump(ctx)
+
 	defer c.queue.close()
 
 	for {
