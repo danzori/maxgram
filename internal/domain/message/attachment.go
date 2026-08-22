@@ -53,12 +53,8 @@ type Attachment struct {
 }
 
 func (a Attachment) NeedsDownload() bool {
-	switch a.Kind {
-	case KindLocation, KindContact, KindShare, KindUnknown:
-		return false
-	default:
-		return true
-	}
+	return a.Kind != KindLocation && a.Kind != KindContact &&
+		a.Kind != KindShare && a.Kind != KindUnknown
 }
 
 func (a Attachment) Resolvable() bool {
@@ -71,6 +67,7 @@ func (a Attachment) DisplayName() string {
 	}
 
 	base, ext := a.defaultName()
+
 	return base + cmp.Or(a.extension(), ext)
 }
 
@@ -90,7 +87,6 @@ func (a Attachment) defaultName() (base, ext string) {
 		return "sticker", ".webp"
 	default:
 		return "file", ""
-
 	}
 }
 
