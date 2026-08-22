@@ -7,6 +7,7 @@ require (
 	github.com/coder/websocket v1.8.15
 	github.com/joho/godotenv v1.5.1
 	github.com/mymmrac/telego v1.11.2
+	golang.org/x/sync v0.21.0
 	golang.org/x/time v0.15.0
 	modernc.org/sqlite v1.57.0
 )
