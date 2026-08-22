@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"sync/atomic"
 	"time"
 
 	"github.com/coder/websocket"
@@ -12,11 +13,28 @@ import (
 const (
 	readLimit   = 32 << 20
 	dialTimeout = 30 * time.Second
+
+	authTimeout        = 30 * time.Second
+	authFailureBackoff = time.Minute
 )
+
+type attempt struct {
+	cancel context.CancelFunc
+
+	authOK atomic.Bool
+	failed atomic.Pointer[error]
+}
+
+func (a *attempt) fail(err error) {
+	a.failed.CompareAndSwap(nil, &err)
+	a.cancel()
+}
 
 func (c *Client) connect(ctx context.Context) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
+
+	a := &attempt{cancel: cancel}
 
 	dialCtx, dialCancel := context.WithTimeout(ctx, dialTimeout)
 	defer dialCancel()
@@ -49,16 +67,37 @@ func (c *Client) connect(ctx context.Context) error {
 	}
 
 	go c.heartbeat(ctx)
+	go c.watchAuth(ctx, a)
 
 	for {
 		_, data, readErr := conn.Read(ctx)
 		if readErr != nil {
+			if failed := a.failed.Load(); failed != nil {
+				return *failed
+			}
+
 			return fmt.Errorf("read: %w", readErr)
 		}
 
-		if err = c.handle(data); err != nil {
+		if err = c.handle(ctx, data, a); err != nil {
+			if fatal(err) {
+				return err
+			}
+
 			c.log.Error("handle packet", "err", err)
 		}
+	}
+}
+
+func (c *Client) watchAuth(ctx context.Context, a *attempt) {
+	select {
+	case <-ctx.Done():
+	case <-time.After(authTimeout):
+		if a.authOK.Load() {
+			return
+		}
+
+		a.fail(fmt.Errorf("%w after %s", ErrAuthTimeout, authTimeout))
 	}
 }
 

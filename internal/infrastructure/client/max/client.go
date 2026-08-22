@@ -21,6 +21,8 @@ type Client struct {
 
 	writeMu sync.Mutex
 	seq     int
+
+	selfID atomic.Int64
 }
 
 func New(cfg config.Max, log *slog.Logger) *Client {
