@@ -96,7 +96,7 @@ func (r *TopicRepository) Save(ctx context.Context, t topic.Topic) error {
 	_, err = r.sb.
 		Insert(topicsTable).
 		Columns(topicColumns...).
-		Values(t.ChatID, t.ThreadID, t.Name, created).
+		Values(t.ChatID, t.ThreadID, t.Name, created.Unix()).
 		Suffix(
 			`
 		ON CONFLICT(chat_id) DO UPDATE SET
