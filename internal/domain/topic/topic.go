@@ -10,7 +10,7 @@ const MaxNameLength = 128
 
 type Topic struct {
 	ChatID   int64
-	ThreadID int64
+	ThreadID int
 
 	Name      string
 	CreatedAt time.Time
