@@ -37,6 +37,6 @@ func remoteReason(payload jsontext.Value) string {
 	if err := json.Unmarshal(payload, &p); err != nil || p.Error == "" {
 		return string(payload)
 	}
-	
+
 	return p.Error + ": " + p.Message
 }

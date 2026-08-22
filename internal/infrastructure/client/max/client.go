@@ -36,7 +36,7 @@ func (c *Client) Run(ctx context.Context) error {
 		err := c.connect(ctx)
 
 		if ctx.Err() != nil {
-			return nil
+			return nil //nolint:nilerr // context cancellation is a normal shutdown
 		}
 
 		if err != nil && !errors.Is(err, context.Canceled) {

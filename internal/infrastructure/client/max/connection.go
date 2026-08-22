@@ -21,6 +21,7 @@ func (c *Client) connect(ctx context.Context) error {
 	dialCtx, dialCancel := context.WithTimeout(ctx, dialTimeout)
 	defer dialCancel()
 
+	//nolint:bodyclose // resp.Body is managed by websocket.Dial
 	conn, _, err := websocket.Dial(
 		dialCtx, c.cfg.WebSocketURL, &websocket.DialOptions{
 			HTTPHeader: c.webSocketHeaders(),
@@ -33,6 +34,7 @@ func (c *Client) connect(ctx context.Context) error {
 	defer func() {
 		_ = conn.CloseNow()
 	}()
+
 	conn.SetReadLimit(readLimit)
 
 	c.log.Info("connected", "url", c.cfg.WebSocketURL)
